@@ -10,4 +10,10 @@ Medico
 
 <h1>Medico</h1>
 
+{% if user.is_authenticated %}
+    <p>Olá, {{ user.username }}. Você está logado.</p>
+{% else %}
+    <p>Você não está logado.</p>
+{% endif %}
+
 {% endblock %}

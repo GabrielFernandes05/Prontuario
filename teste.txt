@@ -1,0 +1,219 @@
+def login(request):
+    template = loader.get_template("login.html")
+    if request.method == "POST":
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            user = form.cleaned_data["user"]
+            password = form.cleaned_data["password"]
+            # Usa o método authenticate do Django
+            user = authenticate(username=user, password=password)
+            if user is not None:
+                # Usa o método login do Django
+                login(request, user)
+                # Verifica se o usuário é médico ou não
+                if user.medico:
+                    return HttpResponseRedirect("/medico/")
+                else:
+                    return HttpResponseRedirect("/paciente/")
+            else:
+                return HttpResponse("Usuário ou senha incorretos")
+    else:
+        form = LoginForm()
+        context = {"form": form}
+        return HttpResponse(template.render(context, request))
+
+def login(request):
+    template = loader.get_template("login.html")
+    if request.method == "POST":
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            user = form.cleaned_data["user"]
+            password = form.cleaned_data["password"]
+            if Usuario.objects.filter(user=user).exists() == True:
+                for x in range(0, (len(Usuario.objects.all()))):
+                    i = Usuario.objects.all()[x]
+                    if i.user == user:
+                        if i.password == password:
+                            if i.medico:
+                                request.session["user"] = user
+                                return HttpResponseRedirect("/medico/")
+                            else:
+                                request.session["user"] = user
+                                return HttpResponseRedirect("/paciente/")
+                        else:
+                            return HttpResponse("Senha incorreta!")
+            else:
+                return HttpResponse("Usuário não cadastrado")
+            return HttpResponseRedirect("/")
+    else:
+        form = LoginForm()
+        context = {"form": form}
+        return HttpResponse(template.render(context, request))
+
+def cadastro(request):
+    template = loader.get_template("cadastro.html")
+    if request.method == "POST":
+        form = CadastroForm(request.POST)
+        if form.is_valid():
+            user = form.cleaned_data["user"]
+            if Usuario.objects.filter(user=user).exists() != True:
+                password = form.cleaned_data["password"]
+                nome = form.cleaned_data["nome"]
+                tel = form.cleaned_data["tel"]
+                nascimento = form.cleaned_data["nascimento"]
+                medico = form.cleaned_data["medico"]
+                if medico:
+                    usuario = Medico(
+                        user=user,
+                        password=password,
+                        nome=nome,
+                        tel=tel,
+                        nascimento=nascimento,
+                    )
+                    usuario.save()
+                else:
+                    usuarioGeral = Usuario(
+                        user=user,
+                        password=password,
+                        nome=nome,
+                        tel=tel,
+                        nascimento=nascimento,
+                        medico=medico,
+                    )
+                    usuarioGeral.save()
+                return HttpResponseRedirect("/login/")
+            else:
+                return HttpResponse("Usuário já cadastrado")
+    else:
+        form = CadastroForm()
+        context = {"form": form}
+        return HttpResponse(template.render(context, request))
+
+def cadastro(request):
+    template = loader.get_template("cadastro.html")
+    if request.method == "POST":
+        form = CadastroForm(request.POST)
+        if form.is_valid():
+            # Usa o método save do formulário para salvar os dados no banco de dados
+            form.save()
+            return HttpResponseRedirect("/login/")
+    else:
+        form = CadastroForm()
+        context = {"form": form}
+        return HttpResponse(template.render(context, request))
+
+Olá, este é o Bing. Eu posso te ajudar a corrigir o formulário de cadastro do seu projeto Django. 😊
+
+O formulário de cadastro que você está usando é um formulário personalizado que herda da classe `forms.Form`. Esse tipo de formulário permite que você defina os campos que você quer usar no seu formulário, mas não tem nenhuma relação com os seus modelos. Isso significa que você tem que fazer a lógica de salvar os dados no banco de dados manualmente, como você está fazendo na sua view.
+
+Uma forma de simplificar o seu formulário de cadastro é usar um formulário baseado em modelo, que herda da classe `forms.ModelForm`. Esse tipo de formulário já tem uma conexão com um modelo específico, e gera os campos automaticamente de acordo com os campos do modelo. Ele também tem um método `save` que salva os dados no banco de dados de forma fácil. Você pode ver como usar um formulário baseado em modelo [aqui](^2^).
+
+Por exemplo, se você tem um modelo chamado `Usuario` que tem os campos `user`, `password`, `nome`, `tel`, `nascimento` e `medico`, você pode criar um formulário baseado em modelo assim:
+
+```python
+# Importa a classe ModelForm
+from django import forms
+from django.forms import ModelForm
+# Importa o modelo Usuario
+from .models import Usuario
+
+# Cria um formulário baseado em modelo
+class CadastroForm(ModelForm):
+    # Define os campos que você quer usar no formulário
+    class Meta:
+        model = Usuario
+        fields = ["user", "password", "nome", "tel", "nascimento", "medico"]
+```
+
+Depois, você pode usar esse formulário na sua view de cadastro, e simplificar a sua lógica de salvar os dados. Você pode fazer algo assim:
+
+```python
+# Importa o formulário baseado em modelo
+from .forms import CadastroForm
+
+# Na sua view de cadastro
+def cadastro(request):
+    template = loader.get_template("cadastro.html")
+    if request.method == "POST":
+        form = CadastroForm(request.POST)
+        if form.is_valid():
+            # Usa o método save do formulário para salvar os dados no banco de dados
+            form.save()
+            return HttpResponseRedirect("/login/")
+    else:
+        form = CadastroForm()
+        context = {"form": form}
+        return HttpResponse(template.render(context, request))
+```
+
+Espero que isso tenha corrigido o seu formulário de cadastro. Se você quiser saber mais sobre como criar e usar formulários no Django, você pode consultar os resultados da pesquisa na web que eu encontrei para você¹²⁴⁵. 😊
+
+Origem: conversa com o Bing, 06/12/2023
+(1) Tutorial Django Parte 9: Trabalhando com formulários. https://developer.mozilla.org/pt-BR/docs/Learn/Server-side/Django/Forms.
+(2) Como Criar Formulários no Django (Python) - Python Academy. https://pythonacademy.com.br/blog/formularios-do-django-com-django-forms.
+(3) Tutorial Django Parte 9: Trabalhando com formulários. https://developer.mozilla.org/pt-BR/docs/Learn/Server-side/Django/Forms.
+(4) Formulário de cadastro com Django e Bootstrap - DevMedia. https://www.devmedia.com.br/exemplo/formulario-de-cadastro-com-django-e-bootstrap/43.
+(5) Criando formulários automaticamente com Django - TreinaWeb. https://www.treinaweb.com.br/blog/criando-formularios-automaticamente-com-django/.
+(6) Criando formulários automaticamente com Django - TreinaWeb. https://bing.com/search?q=como+criar+um+formul%c3%a1rio+de+cadastro+personalizado+no+django.
+
+
+Olá, este é o Bing. Eu posso te ajudar a adaptar os seus modelos do Django para usar o sistema de autenticação padrão do Django. 😊
+
+Os seus modelos estão usando uma classe personalizada chamada `Usuario` para representar os usuários do seu site, mas isso pode trazer alguns problemas de compatibilidade e segurança com o Django. O Django já fornece um modelo padrão chamado `User` que tem vários atributos e métodos úteis para lidar com a autenticação e as permissões dos usuários. Você pode usar esse modelo em vez de criar o seu próprio, ou então fazer o seu modelo `Usuario` herdar do modelo `User`. Isso vai facilitar a integração com o sistema de autenticação do Django e evitar possíveis conflitos de nomes.
+
+Para adaptar os seus modelos, você pode seguir os seguintes passos:
+
+- Importe o modelo `User` do módulo `django.contrib.auth.models` no seu arquivo `models.py`.
+- Altere a classe `Usuario` para herdar do modelo `User` em vez de `models.Model`. Isso vai fazer com que a classe `Usuario` tenha todos os atributos e métodos do modelo `User`, como `username`, `password`, `email`, `is_staff`, `is_active`, etc. Você pode ver a lista completa dos atributos e métodos do modelo `User` [aqui](^1^).
+- Remova os atributos `user` e `password` da classe `Usuario`, pois eles já são fornecidos pelo modelo `User`. Você pode manter os outros atributos que são específicos do seu site, como `nome`, `tel`, `nascimento` e `medico`.
+- Altere as classes `Medico` e `Paciente` para herdar da classe `Usuario` em vez de `models.Model`. Isso vai fazer com que elas também tenham todos os atributos e métodos do modelo `User` e da classe `Usuario`.
+- Altere o campo `medicoResponsavel` da classe `Paciente` para usar o modelo `User` em vez de `Medico` como chave estrangeira. Isso vai permitir que você associe qualquer usuário que seja médico a um paciente, sem precisar de uma classe separada para os médicos.
+- Adicione um método `save` na classe `Usuario` para definir o atributo `medico` de acordo com o valor do parâmetro `is_staff` do modelo `User`. Isso vai fazer com que os usuários que sejam staff sejam considerados médicos, e os que não sejam staff sejam considerados pacientes. Você pode ver como usar o parâmetro `is_staff` [aqui](^2^).
+
+Com essas alterações, os seus modelos podem ficar assim:
+
+```python
+# Importa o modelo User
+from django.contrib.auth.models import User
+from django.db import models
+
+# Altera a classe Usuario para herdar do modelo User
+class Usuario(User):
+    # Remove os atributos user e password
+    # Mantém os outros atributos
+    nome = models.CharField(max_length=255)
+    tel = models.IntegerField()
+    nascimento = models.DateField()
+    medico = models.BooleanField()
+
+    def __str__(self):
+        return f"{self.nome}"
+
+    # Adiciona um método save para definir o atributo medico
+    def save(self, *args, **kwargs):
+        # Define o atributo medico de acordo com o valor de is_staff
+        self.medico = self.is_staff
+        # Chama o método save da superclasse
+        super().save(*args, **kwargs)
+
+# Altera as classes Medico e Paciente para herdar da classe Usuario
+class Medico(Usuario):
+    # Não precisa de nenhum atributo ou método específico
+    pass
+
+class Paciente(Usuario):
+    sintomas = models.CharField(max_length=255)
+    dataDeEntrada = models.DateField()
+    # Altera o campo medicoResponsavel para usar o modelo User
+    medicoResponsavel = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+```
+
+Espero que isso tenha adaptado os seus modelos para usar o sistema de autenticação do Django. Se você quiser saber mais sobre como usar o modelo `User` e o sistema de autenticação do Django, você pode consultar os resultados da pesquisa na web que eu encontrei para você¹²³⁴. 😊
+
+Origem: conversa com o Bing, 06/12/2023
+(1) Tutorial Django Parte 3: Usando models - MDN Web Docs. https://developer.mozilla.org/pt-BR/docs/Learn/Server-side/Django/Models.
+(2) Escrevendo campos personalizados de modelos. | Documentação do Django .... https://docs.djangoproject.com/pt-br/3.0/howto/custom-model-fields/.
+(3) Tutorial Django Parte 3: Usando models - MDN Web Docs. https://developer.mozilla.org/pt-BR/docs/Learn/Server-side/Django/Models.
+(4) Escrevendo campos personalizados de modelos. | Documentação do Django .... https://docs.djangoproject.com/pt-br/3.0/howto/custom-model-fields/.
+(5) Models — Django 1.0 documentation - Read the Docs. https://django-portuguese.readthedocs.io/en/1.0/topics/db/models.html.
+(6) Modelo de projeto Web do Django para Python - Visual Studio (Windows .... https://learn.microsoft.com/pt-br/visualstudio/python/python-django-web-application-project-template?view=vs-2022.

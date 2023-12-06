@@ -1,6 +1,5 @@
 from django import forms
 
-
 class CadastroForm(forms.Form):
     user = forms.CharField(label="Usuário", max_length=255)
     password = forms.CharField(label="Senha", max_length=255)
