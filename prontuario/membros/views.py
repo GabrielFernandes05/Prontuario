@@ -70,11 +70,14 @@ def login(request):
             senha = form.cleaned_data["password"]
             usuario = authenticate(username=nome_usuario, password=senha)
             print(usuario)
-            if usuario is not None:
+            print(senha)
+            if usuario != None:
                 if usuario in Medico.objects.all():
+                    print("logando como medico")
                     login(request, usuario)
                     return HttpResponseRedirect("/medico/")
                 elif usuario in Paciente.objects.all():
+                    print("logando como paciente")
                     login(request, usuario)
                     return HttpResponseRedirect("/paciente/")
     else:
@@ -83,19 +86,19 @@ def login(request):
     return HttpResponse(template.render(context, request))
 
 
-@login_required
+
 def medico(request):
     template = loader.get_template("medico.html")
     return HttpResponse(template.render())
 
 
-@login_required
+
 def paciente(request):
     template = loader.get_template("paciente.html")
     return HttpResponse(template.render())
 
 
-@login_required
+
 def logout(request):
     request.session.flush()
     return HttpResponseRedirect("/")
