@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, logout
+from django.contrib.auth import login as auth_login
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
 from .forms import CadastroForm, LoginForm
@@ -11,7 +12,11 @@ from django.template import loader
 
 def home(request):
     template = loader.get_template("home.html")
-    return HttpResponse(template.render())
+    c = 0
+    for user in User.objects.all():
+        c += 1
+    context = {"c": c}
+    return HttpResponse(template.render(context, request))
 
 
 def cadastro(request):
@@ -62,6 +67,8 @@ def cadastro(request):
 
 
 def login(request):
+    erro = False
+    mensagem = "Usuario ou senha estão incorretos!"
     template = loader.get_template("login.html")
     if request.method == "POST":
         form = LoginForm(request.POST)
@@ -72,31 +79,50 @@ def login(request):
             print(usuario)
             print(senha)
             if usuario != None:
-                if usuario in Medico.objects.all():
+                if Medico.objects.filter(username=usuario).exists():
                     print("logando como medico")
-                    login(request, usuario)
+                    auth_login(request, usuario)
                     return HttpResponseRedirect("/medico/")
-                elif usuario in Paciente.objects.all():
+                elif Paciente.objects.filter(username=usuario).exists():
                     print("logando como paciente")
-                    login(request, usuario)
+                    auth_login(request, usuario)
                     return HttpResponseRedirect("/paciente/")
+            else:
+                erro = True
+                print("Usuario ou senha estão incorretos!", erro)
+                return HttpResponse(
+                    template.render(
+                        {"form": form, "mensagem": mensagem, "erro": erro}, request
+                    )
+                )
     else:
         form = LoginForm()
-    context = {"form": form}
+    context = {"form": form, "mensagem": mensagem, "erro": erro}
     return HttpResponse(template.render(context, request))
 
 
-
+@login_required
 def medico(request):
     template = loader.get_template("medico.html")
-    return HttpResponse(template.render())
+    usera = False
+    if request.user.is_authenticated:
+        print("O usuário está autenticado")
+        usera = True
+    else:
+        print("O usuário não está autenticado")
+    return HttpResponse(template.render({"usera": usera}, request))
 
 
-
+@login_required
 def paciente(request):
     template = loader.get_template("paciente.html")
-    return HttpResponse(template.render())
-
+    usera = False
+    if request.user.is_authenticated:
+        print("O usuário está autenticado")
+        usera = True
+    else:
+        print("O usuário não está autenticado")
+    return HttpResponse(template.render({"usera": usera}, request))
 
 
 def logout(request):
