@@ -1,19 +1,14 @@
 from django.contrib import admin
-from .models import Usuario, Medico, Paciente
-
-
-class UsuarioAdmin(admin.ModelAdmin):
-    list_display = ("user", "password", "nome", "tel", "nascimento", "medico")
+from .models import Medico, Paciente
 
 
 class MedicoAdmin(admin.ModelAdmin):
-    list_display = ("nome", "medico", "usuario_ptr")
+    list_display = ("nome", "tel", "nascimento")
 
 
 class PacienteAdmin(admin.ModelAdmin):
-    list_display = ("nome", "sintomas", "dataDeEntrada", "medicoResponsavel", "medico")
+    list_display = ("nome", "sintomas", "dataDeEntrada", "medicoResponsavel")
 
 
-admin.site.register(Usuario, UsuarioAdmin)
 admin.site.register(Medico, MedicoAdmin)
 admin.site.register(Paciente, PacienteAdmin)

@@ -129,4 +129,4 @@ LOGIN_URL = 'login'
 
 LOGIN_REDIRECT_URL = '/'
 
-# AUTH_USER_MODEL = 'membros.Usuario'
+AUTHENTICATION_BACKENDS = ['membros.models.UsuarioBackend']

@@ -1,23 +1,44 @@
+from django.contrib.auth.backends import ModelBackend
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from django.db import models
 
+
 class Usuario(User):
-    nome = models.CharField(max_length=255)
-    tel = models.IntegerField()
-    nascimento = models.DateField()
-    medico = models.BooleanField()
+    nome = models.CharField(max_length=255, null=True)
+    tel = models.IntegerField(null=True)
+    nascimento = models.DateField(null=True)
+
+    class Meta:
+        abstract = True
 
     def __str__(self):
         return f"{self.nome}"
 
-    def save(self, *args, **kwargs):
-        self.medico = self.is_staff
-        super().save(*args, **kwargs)
 
 class Medico(Usuario):
     pass
 
+
 class Paciente(Usuario):
-    sintomas = models.CharField(max_length=255)
-    dataDeEntrada = models.DateField()
-    medicoResponsavel = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    sintomas = models.CharField(max_length=255, null=True)
+    dataDeEntrada = models.DateField(null=True)
+    medicoResponsavel = models.ForeignKey(Medico, on_delete=models.SET_NULL, null=True)
+
+
+class UsuarioBackend(ModelBackend):
+    def authenticate(self, request, username=None, password=None, **kwargs):
+        UserModel = get_user_model()
+        try:
+            user = UserModel.objects.get(username=username)
+            if user.check_password(password):
+                return user
+        except UserModel.DoesNotExist:
+            return None
+
+    def get_user(self, user_id):
+        UserModel = get_user_model()
+        try:
+            return UserModel.objects.get(pk=user_id)
+        except UserModel.DoesNotExist:
+            return None
