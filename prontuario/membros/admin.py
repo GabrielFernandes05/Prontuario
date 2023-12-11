@@ -7,7 +7,7 @@ class MedicoAdmin(admin.ModelAdmin):
 
 
 class PacienteAdmin(admin.ModelAdmin):
-    list_display = ("nome", "sintomas", "dataDeEntrada", "medicoResponsavel")
+    list_display = ("nome", "sintomas", "dataDeEntrada", "medicoResponsavel", "doente")
 
 
 admin.site.register(Medico, MedicoAdmin)

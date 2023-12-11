@@ -24,6 +24,7 @@ class Paciente(Usuario):
     sintomas = models.CharField(max_length=255, null=True)
     dataDeEntrada = models.DateField(null=True)
     medicoResponsavel = models.ForeignKey(Medico, on_delete=models.SET_NULL, null=True)
+    doente = models.BooleanField(default=False, null=True)
 
 
 class UsuarioBackend(ModelBackend):

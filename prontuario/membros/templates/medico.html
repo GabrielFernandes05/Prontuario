@@ -37,9 +37,13 @@ Medico
 </nav>
 
 {% if usera %}
-    <p>Olá, {{ user.username }}. Você está logado.</p>
+{% if medico %}
+<p>Olá, {{ user.username }}. Você está logado.</p>
 {% else %}
-    <p>Você não está logado.</p>
+<p>Você não está logado como medico.</p>
+{% endif %}
+{% else %}
+<p>Você não está logado.</p>
 {% endif %}
 
 {% endblock %}

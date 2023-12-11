@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load django_bootstrap5 %}
 
 {% block title %}
 
@@ -37,9 +38,65 @@ Paciente
 </nav>
 
 {% if usera %}
-    <p>Olá, {{ user.username }}. Você está logado.</p>
+{% if medico %}
+<p>Você não está logado como paciente.</p>
 {% else %}
-    <p>Você não está logado.</p>
+<p>Olá, {{ user.username }}. Você está logado.</p>
+
+{% if not doente %}
+<div class="p-1 bg-white text-black text-center">
+    <h1>Criar chamado!</h1>
+    <h5 style="font-size: 90%">Obs: Você só pode criar um chamado por vez, quando este for fechado você poderá abrir
+        outro!!!</h5>
+</div>
+
+<div class="container">
+    <div class="row my-5">
+        <div class="col-md-12">
+            <form action="" method="post" class="form">
+                {% csrf_token %}
+                {% bootstrap_form form %}
+                <button type="submit" class="btn btn-primary">Criar chamado!</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% else %}
+
+<div class="p-1 bg-white text-black text-center">
+    <h1>Parabens!</h1>
+    <h5 style="font-size: 200%">Seu chamado foi efetuado com sucesso em alguns instantes atualize a pagina para
+        verificar quem será o medico responsavel!!!</h5>
+    <h2>Sintomas: {{sintoma}}</h2>
+    <h2>Data de entrada: {{data}}</h2>
+    <h2>Medico responsavel: {{ medicoResponsavel }}</h2>
+</div>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<div class="p-1 bg-white text-black text-center">
+    <h1>Cancelar Chamado!</h1>
+    <h5 style="font-size: 90%">Obs: Você só pode criar um chamado por vez, quando este for fechado você poderá abrir
+        outro!!!</h5>
+</div>
+
+<div class="container">
+    <div class="row my-5">
+        <div class="col-md-12">
+            <form action="" method="post" class="form">
+                {% csrf_token %}
+                {% bootstrap_form form2 %}
+                <button type="submit" class="btn btn-primary">Cancelar!</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+{% endif %}
+
+
+{% endif %}
+{% else %}
+<p>Você não está logado.</p>
 {% endif %}
 
 {% endblock %}

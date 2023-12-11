@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, logout
 from django.contrib.auth import login as auth_login
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
-from .forms import CadastroForm, LoginForm
+from .forms import CadastroForm, LoginForm, CriarChamadoForm, CancelarChamadoForm
 from .models import Medico, Paciente
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -117,12 +117,98 @@ def medico(request):
 def paciente(request):
     template = loader.get_template("paciente.html")
     usera = False
+    if request.method == "POST":
+        form = CriarChamadoForm(request.POST)
+        if form.is_valid():
+            sintoma = form.cleaned_data["sintomas"]
+            data = form.cleaned_data["dataDeEntrada"]
+            usuario = request.user.username
+            print(usuario)
+            c = 0
+            for x in Paciente.objects.all():
+                # print(x.username, c)
+                if x.username == usuario:
+                    # print("-" * 50)
+                    # print("-" * 50)
+                    # print("-" * 50)
+                    # print(x.username, c)
+                    # print("-" * 50)
+                    # print("-" * 50)
+                    # print("-" * 50)
+                    break
+                else:
+                    c += 1
+            usuario = Paciente.objects.all()[c]
+            usuario.sintomas = sintoma
+            usuario.dataDeEntrada = data
+            usuario.doente = True
+            usuario.save()
+            # print(
+            #     usuario.username,
+            #     usuario.password,
+            #     usuario.nome,
+            #     usuario.tel,
+            #     usuario.nascimento,
+            #     usuario.doente,
+            # )
+    else:
+        form = CriarChamadoForm()
+    if request.method == "POST":
+        form2 = CancelarChamadoForm(request.POST)
+        if form2.is_valid():
+            username = request.user.username
+            c = 0
+            for x in Paciente.objects.all():
+                if x.username == username:
+                    break
+                else:
+                    c += 1
+            paciente = Paciente.objects.all()[c]
+            paciente.doente = False
+            paciente.sintomas = ""
+            paciente.dataDeEntrada = None
+            paciente.medicoResponsavel = None
+            paciente.save()
+    else:
+        form2 = CancelarChamadoForm()
     if request.user.is_authenticated:
         print("O usuário está autenticado")
         usera = True
+        medico = False
+        username = request.user.username
+        c = 0
+        for x in Paciente.objects.all():
+            if x.username == username:
+                break
+            else:
+                c += 1
+        paciente = Paciente.objects.all()[c]
+        doente = paciente.doente
+        sintoma = paciente.sintomas
+        data = paciente.dataDeEntrada
+        medicoResponsavel = paciente.medicoResponsavel
+        medicoResponsavel = str(medicoResponsavel)
+        if medicoResponsavel == "None":
+            medicoResponsavel = "Na fila..."
+        else:
+            medicoResponsavel = f"Dr.{medicoResponsavel.capitalize()}"
     else:
         print("O usuário não está autenticado")
-    return HttpResponse(template.render({"usera": usera}, request))
+    return HttpResponse(
+        template.render(
+            {
+                "usera": usera,
+                "medico": medico,
+                "form": form,
+                "form2": form2,
+                "doente": doente,
+                "sintoma": sintoma,
+                "data": data,
+                "medicoResponsavel": medicoResponsavel,
+            },
+            request,
+        )
+    )
 
 
 def logout(request):
