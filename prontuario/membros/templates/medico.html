@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load django_bootstrap5 %}
 
 {% block title %}
 
@@ -38,7 +39,43 @@ Medico
 
 {% if usera %}
 {% if medico %}
-<p>Olá, {{ user.username }}. Você está logado.</p>
+<div class="container">
+    <p>Olá, {{ user.username }}. Você está logado.</p>
+</div>
+
+<div class="container">
+    <h3 class="mb-3">Pacientes disponiveis para o atendimentos</h3>
+    <ul class="list-group">
+        {% for x in lista_de_pacientes %}
+        {% if x.doente %}
+        {% if x.medicoResponsavel is None %}
+        <li class="list-group-item">
+            <div class="container">
+                <h4>{{x}} <a href="/medico/detalhes/{{x.id}}" style="font-size: 60%">Detalhes</a> </h4>
+                <p>{{x.dataDeEntrada}}</p>
+                <p>{{x.sintomas}}</p>
+            </div>
+        </li>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+    </ul>
+</div>
+<div class="container">
+    <h3 class="mb-3">Seus pacientes</h3>
+    <ul class="list-group">
+        {% for x in lista_de_pacientes %}
+        {% if x.doente %}
+        {% if x.medicoResponsavel == nome %}
+        <h4>{{x}} <a href="/medico/detalhes/{{x.id}}" style="font-size: 60%">Detalhes</a> </h4>
+        <p>{{x.dataDeEntrada}}</p>
+        <p>{{x.sintomas}}</p>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+</div>
+
+
 {% else %}
 <p>Você não está logado como medico.</p>
 {% endif %}
