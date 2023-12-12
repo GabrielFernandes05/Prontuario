@@ -39,9 +39,8 @@ Medico
 
 {% if usera %}
 {% if medico %}
-<div class="container">
-    <p>Olá, {{ user.username }}. Você está logado.</p>
-</div>
+
+<p>Olá, {{ nome }}. Você está logado.</p>
 
 <div class="container">
     <h3 class="mb-3">Pacientes disponiveis para o atendimentos</h3>
@@ -66,13 +65,18 @@ Medico
     <ul class="list-group">
         {% for x in lista_de_pacientes %}
         {% if x.doente %}
-        {% if x.medicoResponsavel == nome %}
-        <h4>{{x}} <a href="/medico/detalhes/{{x.id}}" style="font-size: 60%">Detalhes</a> </h4>
-        <p>{{x.dataDeEntrada}}</p>
-        <p>{{x.sintomas}}</p>
+        {% if x.medicoResponsavel|stringformat:"s" == nome|stringformat:"s" %}
+        <li class="list-group-item">
+            <div class="container">
+                <h4>{{x}} <a href="/medico/detalhes/{{x.id}}" style="font-size: 60%">Detalhes</a> </h4>
+                <p>{{x.dataDeEntrada}}</p>
+                <p>{{x.sintomas}}</p>
+            </div>
+        </li>
         {% endif %}
         {% endif %}
         {% endfor %}
+    </ul>
 </div>
 
 

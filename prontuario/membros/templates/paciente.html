@@ -41,7 +41,7 @@ Paciente
 {% if medico %}
 <p>Você não está logado como paciente.</p>
 {% else %}
-<p>Olá, {{ user.username }}. Você está logado.</p>
+<p>Olá, {{ nome }}. Você está logado.</p>
 
 {% if not doente %}
 <div class="p-1 bg-white text-black text-center">
@@ -63,31 +63,31 @@ Paciente
 </div>
 {% else %}
 
-<div class="p-1 bg-white text-black text-center">
-    <h1>Parabens!</h1>
-    <h5 style="font-size: 200%">Seu chamado foi efetuado com sucesso em alguns instantes atualize a pagina para
-        verificar quem será o medico responsavel!!!</h5>
-    <h2>Sintomas: {{sintoma}}</h2>
-    <h2>Data de entrada: {{data}}</h2>
-    <h2>Medico responsavel: {{ medicoResponsavel }}</h2>
-</div>
-<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
-<div class="p-1 bg-white text-black text-center">
-    <h1>Cancelar Chamado!</h1>
-    <h5 style="font-size: 90%">Obs: Você só pode criar um chamado por vez, quando este for fechado você poderá abrir
-        outro!!!</h5>
+<div class="container">
+    <h1 class="mb-3">Chamado atual</h1>
+    <div class="card">
+        <div class="card-body">
+            <h4 class="card-title">{{nome}}</h4>
+            <p class="card-text">
+                Sintomas: {{sintoma}} <br>
+                Data de entrada: {{data}} <br>
+                Medico responsavel: {{ medicoResponsavel }} <br>
+            </p>
+        </div>
+    </div>
 </div>
 
+<br><br><br>
+
 <div class="container">
-    <div class="row my-5">
-        <div class="col-md-12">
+    <h1 class="mb-3">Cancelar Chamado</h1>
+    <h5 style="font-size: 90%">Obs: Você só pode criar um chamado por vez, quando este for fechado você poderá abrir
+        outro!!!</h5>
             <form action="" method="post" class="form">
                 {% csrf_token %}
                 {% bootstrap_form form2 %}
-                <button type="submit" class="btn btn-primary">Cancelar!</button>
+                <button type="submit" class="btn btn-outline-danger">Cancelar!</button>
             </form>
-        </div>
-    </div>
 </div>
 
 

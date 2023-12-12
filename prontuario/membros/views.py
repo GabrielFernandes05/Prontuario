@@ -114,6 +114,7 @@ def medico(request):
         usera = True
         medico = False
         username = request.user.username
+        user = request.user
         print(username)
         if Medico.objects.all().filter(username=username).exists():
             medico = True
@@ -122,7 +123,12 @@ def medico(request):
         for x in Medico.objects.all():
             if x.username == username:
                 nome = x.nome
+                print(nome)
                 break
+        for x in Paciente.objects.all():
+            if str(x.medicoResponsavel) == str(nome):
+                print("achei!")
+                print(x.medicoResponsavel, nome)
     else:
         print("O usuário não está autenticado")
     return HttpResponse(
@@ -200,6 +206,7 @@ def paciente(request):
             doente = paciente.doente
             sintoma = paciente.sintomas
             data = paciente.dataDeEntrada
+            nome = paciente.nome
             medicoResponsavel = paciente.medicoResponsavel
             medicoResponsavel = str(medicoResponsavel)
             if medicoResponsavel == "None":
@@ -211,6 +218,7 @@ def paciente(request):
             sintoma = 0
             data = 0
             medicoResponsavel = 0
+            nome = 0
     else:
         print("O usuário não está autenticado")
     return HttpResponse(
@@ -223,6 +231,7 @@ def paciente(request):
                 "doente": doente,
                 "sintoma": sintoma,
                 "data": data,
+                "nome": nome,
                 "medicoResponsavel": medicoResponsavel,
             },
             request,
@@ -234,10 +243,18 @@ def logout(request):
     request.session.flush()
     return HttpResponseRedirect("/")
 
+
+@login_required
 def detalhes(request, id):
     template = loader.get_template("detalhes.html")
     x = Paciente.objects.get(id=id)
+    username = request.user.username
+    medico = False
+    for x in Medico.objects.all():
+        if x.username == username:
+            medico = True
     context = {
-        "x" : x,
+        "x": x,
+        "medico": medico,
     }
     return HttpResponse(template.render(context, request))
