@@ -105,6 +105,8 @@ def login(request):
 
 @login_required
 def medico(request):
+    for x in Paciente.objects.all():
+        print(x.id, x)
     template = loader.get_template("medico.html")
     usera = False
     lista_de_pacientes = []
@@ -268,18 +270,17 @@ def logout(request):
 
 @login_required
 def detalhes(request, id):
+    medico = Medico.objects.get(id=request.user.id)
     template = loader.get_template("detalhes.html")
     x = Paciente.objects.get(id=id)
-    username = request.user.username
-    medico = False
-    for x in Medico.objects.all():
-        if x.username == username:
-            medico = True
-    context = {
-        "x": x,
-        "medico": medico,
-    }
-    return HttpResponse(template.render(context, request))
+    if x.medicoResponsavel == medico or x.medicoResponsavel == None:
+        context = {
+            "x": x,
+            "medico": medico,
+        }
+        return HttpResponse(template.render(context, request))
+    else:
+        return HttpResponseRedirect('/medico/')
 
 
 @csrf_exempt
