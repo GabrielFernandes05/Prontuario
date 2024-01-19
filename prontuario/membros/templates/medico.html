@@ -41,18 +41,25 @@ Medico
 {% if medico %}
 
 <p>Olá, {{ nome }}. Você está logado.</p>
-
+{% if pacientes_disponiveis == True %}
 <div class="container">
-    <h3 class="mb-3">Pacientes disponiveis para o atendimentos</h3>
+    <h3 class="mb-3 p-2">Pacientes disponiveis para o atendimentos</h3>
     <ul class="list-group">
         {% for x in lista_de_pacientes %}
         {% if x.doente %}
         {% if x.medicoResponsavel is None %}
         <li class="list-group-item">
-            <div class="container">
-                <h4>{{x}} <a href="/medico/detalhes/{{x.id}}" style="font-size: 60%">Detalhes</a> </h4>
-                <p>{{x.dataDeEntrada}}</p>
-                <p>{{x.sintomas}}</p>
+            <div class="container d-flex">
+                <div class="container p-3">
+                    <h4>{{x}} <a href="/medico/detalhes/{{x.id}}" style="font-size: 60%">Detalhes</a> </h4>
+                    <p>{{x.dataDeEntrada}}</p>
+                    <p>{{x.sintomas}}</p>
+                </div>
+                <div class="container p-3">
+                    <p class="text-end"><button class="btna btn btn-outline-success" id="a-{{x.id}}">
+                            <p class="fw-bold"> Aceitar chamado! </p>
+                        </button></p>
+                </div>
             </div>
         </li>
         {% endif %}
@@ -60,17 +67,29 @@ Medico
         {% endfor %}
     </ul>
 </div>
+{% endif %}
+
+{% if pacientes_seus == True %}
 <div class="container">
-    <h3 class="mb-3">Seus pacientes</h3>
+    <h3 class="mb-3 p-2">Seus pacientes</h3>
     <ul class="list-group">
         {% for x in lista_de_pacientes %}
         {% if x.doente %}
         {% if x.medicoResponsavel|stringformat:"s" == nome|stringformat:"s" %}
         <li class="list-group-item">
-            <div class="container">
-                <h4>{{x}} <a href="/medico/detalhes/{{x.id}}" style="font-size: 60%">Detalhes</a> </h4>
-                <p>{{x.dataDeEntrada}}</p>
-                <p>{{x.sintomas}}</p>
+            <div class="container d-flex">
+                <div class="container p-3">
+                    <h4> {{x.nome}} <a href="/medico/detalhes/{{x.id}}" style="font-size: 60%">Detalhes</a> </h4>
+                    <p> {{x.dataDeEntrada}}</p>
+                    <p> {{x.sintomas}}</p>
+                </div>
+                <div class="container p-3">
+                    <p class="text-end ">
+                        <button class="btnf btn btn-outline-danger" id="{{x.id}}">
+                            <p class="fw-bold"> Fechar chamado!</p>
+                        </button>
+                    </p>
+                </div>
             </div>
         </li>
         {% endif %}
@@ -78,6 +97,7 @@ Medico
         {% endfor %}
     </ul>
 </div>
+{% endif %}
 
 
 {% else %}
@@ -87,4 +107,31 @@ Medico
 <p>Você não está logado.</p>
 {% endif %}
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+
+    $(".btna").click(function () {
+        var idbotao = $(this).attr('id');
+        $.ajax({
+            url: '/aceitarchamado/',
+            type: 'get',
+            data: { 'idbotao': idbotao, },
+            success: function (response) {
+                window.location.reload();
+            },
+        });
+    });
+
+    $(".btnf").click(function () {
+        var idbotao = $(this).attr('id');
+        $.ajax({
+            url: '/fecharchamado/',
+            type: 'get',
+            data: { 'idbotao': idbotao },
+            success: function (response) {
+                window.location.reload();
+            }
+        });
+    });
+</script>
 {% endblock %}

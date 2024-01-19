@@ -1,11 +1,13 @@
 from .forms import CadastroForm, LoginForm, CriarChamadoForm, CancelarChamadoForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, logout
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import login as auth_login
 from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User
 from .models import Medico, Paciente
 from django.http import HttpResponse
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.template import loader
 
@@ -106,29 +108,47 @@ def medico(request):
     template = loader.get_template("medico.html")
     usera = False
     lista_de_pacientes = []
+    usuerpaciente = False
     for x in Paciente.objects.all():
-        print(x.username, x.medicoResponsavel)
-        lista_de_pacientes.append(x)
+        if str(x.id) == str(request.user.id):
+            usuerpaciente = True
+            medicologado = "123"
+            pacientes_disponiveis = "123"
+            pacientes_seus = "123"
+    if usuerpaciente == False:
+        pacientes_disponiveis = False
+        pacientes_seus = False
+        for x in Medico.objects.all():
+            if str(x.username) == str(request.user.username):
+                print("è ele aqui!")
+                medicologado = x
+        for x in Paciente.objects.all():
+            print(x.username, x.medicoResponsavel)
+            lista_de_pacientes.append(x)
+            if x.medicoResponsavel == None:
+                pacientes_disponiveis = True
+            if x.medicoResponsavel == medicologado:
+                pacientes_seus = True
     if request.user.is_authenticated:
         print("O usuário está autenticado")
         usera = True
         medico = False
         username = request.user.username
         user = request.user
-        print(username)
+        # print(username)
         if Medico.objects.all().filter(username=username).exists():
             medico = True
-            print(medico)
+            # print(medico)
         nome = "0"
         for x in Medico.objects.all():
             if x.username == username:
                 nome = x.nome
-                print(nome)
+                # print(nome)
                 break
-        for x in Paciente.objects.all():
-            if str(x.medicoResponsavel) == str(nome):
-                print("achei!")
-                print(x.medicoResponsavel, nome)
+        # for x in Paciente.objects.all():
+        #     if str(x.medicoResponsavel) == str(nome):
+        #         print("achei!")
+        #         print(x.medicoResponsavel, nome)
     else:
         print("O usuário não está autenticado")
     return HttpResponse(
@@ -138,6 +158,8 @@ def medico(request):
                 "lista_de_pacientes": lista_de_pacientes,
                 "medico": medico,
                 "nome": nome,
+                "pacientes_disponiveis": pacientes_disponiveis,
+                "pacientes_seus": pacientes_seus,
             },
             request,
         )
@@ -258,3 +280,41 @@ def detalhes(request, id):
         "medico": medico,
     }
     return HttpResponse(template.render(context, request))
+
+
+@csrf_exempt
+def aceitarchamado(request):
+    idbotao = request.GET.get("idbotao")
+    data = {
+        "idbotao": idbotao,
+    }
+    id = data["idbotao"][2:]
+    print(id)
+    print("---" * 10)
+    for x in Paciente.objects.all():
+        if str(x.id) == str(id):
+            pacienteaceito = x
+    print(pacienteaceito.medicoResponsavel)
+    for x in Medico.objects.all():
+        if str(x.id) == str(request.user.id):
+            medicologado = x
+    pacienteaceito.medicoResponsavel = medicologado
+    pacienteaceito.save()
+    return JsonResponse(data)
+
+
+@csrf_exempt
+def fecharchamado(request):
+    idbotao = request.GET.get("idbotao")
+    data = {
+        "idbotao": idbotao,
+    }
+    id = data["idbotao"]
+    print(id)
+    for x in Paciente.objects.all():
+        if str(x.id) == str(id):
+            print("Achei!")
+            pacienteaceito = x
+    pacienteaceito.medicoResponsavel = None
+    pacienteaceito.save()
+    return JsonResponse(data)
