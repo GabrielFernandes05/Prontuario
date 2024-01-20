@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load django_bootstrap5 %}
+
+{% block title %}
+
+Acompanhamento do chamado!
+
+{% endblock %}
+<!-------------------------------------------->
+{% block content %}
+
+<div class="container pb-5 pt-5">
+    <p class="h1 text-muted pb-5 pt-5"> {{userp.nome}} </p>
+    <div class="card">
+        <div class="card-header">
+            <p> Medico responsavel: {{userp.medicoResponsavel}} </p>
+        </div>
+        <div class="card-body">
+            <p> Tratamento: {{userp.tratamento}} </p>
+        </div>
+        <div class="card-footer">
+            <p> Status: {{userp.status}} </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

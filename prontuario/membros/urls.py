@@ -11,4 +11,10 @@ urlpatterns = [
     path("medico/detalhes/<int:id>", views.detalhes, name="detalhes"),
     path("aceitarchamado/", views.aceitarchamado, name="aceitarchamado"),
     path("fecharchamado/", views.fecharchamado, name="fecharchamado"),
+    path(
+        "paciente/acompanharchamado/<int:id>",
+        views.acompanharchamado,
+        name="acompanharchamado",
+    ),
+    path("enviartratamento/", views.enviartratamento, name="enviartratamento"),
 ]

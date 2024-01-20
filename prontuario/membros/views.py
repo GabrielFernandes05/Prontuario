@@ -1,5 +1,6 @@
 from .forms import CadastroForm, LoginForm, CriarChamadoForm, CancelarChamadoForm
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import authenticate, logout
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import login as auth_login
@@ -10,6 +11,7 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.template import loader
+from datetime import datetime
 
 
 def home(request):
@@ -105,8 +107,6 @@ def login(request):
 
 @login_required
 def medico(request):
-    for x in Paciente.objects.all():
-        print(x.id, x)
     template = loader.get_template("medico.html")
     usera = False
     lista_de_pacientes = []
@@ -231,14 +231,16 @@ def paciente(request):
             sintoma = paciente.sintomas
             data = paciente.dataDeEntrada
             nome = paciente.nome
+            idp = request.user.id
             medicoResponsavel = paciente.medicoResponsavel
             medicoResponsavel = str(medicoResponsavel)
             if medicoResponsavel == "None":
                 medicoResponsavel = "Na fila..."
             else:
-                medicoResponsavel = f"Dr.{medicoResponsavel.capitalize()}"
+                medicoResponsavel = f"Dr. {medicoResponsavel.title()}"
         else:
             doente = 0
+            idp = 0
             sintoma = 0
             data = 0
             medicoResponsavel = 0
@@ -257,6 +259,7 @@ def paciente(request):
                 "data": data,
                 "nome": nome,
                 "medicoResponsavel": medicoResponsavel,
+                "idp": idp,
             },
             request,
         )
@@ -270,6 +273,10 @@ def logout(request):
 
 @login_required
 def detalhes(request, id):
+    try:
+        Medico.objects.get(id=request.user.id)
+    except ObjectDoesNotExist:
+        return HttpResponseRedirect("/paciente/")
     medico = Medico.objects.get(id=request.user.id)
     template = loader.get_template("detalhes.html")
     x = Paciente.objects.get(id=id)
@@ -280,7 +287,7 @@ def detalhes(request, id):
         }
         return HttpResponse(template.render(context, request))
     else:
-        return HttpResponseRedirect('/medico/')
+        return HttpResponseRedirect("/medico/")
 
 
 @csrf_exempt
@@ -292,14 +299,10 @@ def aceitarchamado(request):
     id = data["idbotao"][2:]
     print(id)
     print("---" * 10)
-    for x in Paciente.objects.all():
-        if str(x.id) == str(id):
-            pacienteaceito = x
-    print(pacienteaceito.medicoResponsavel)
-    for x in Medico.objects.all():
-        if str(x.id) == str(request.user.id):
-            medicologado = x
+    pacienteaceito = Paciente.objects.get(id=id)
+    medicologado = Medico.objects.get(id=request.user.id)
     pacienteaceito.medicoResponsavel = medicologado
+    pacienteaceito.status = "Em andamento!"
     pacienteaceito.save()
     return JsonResponse(data)
 
@@ -317,5 +320,36 @@ def fecharchamado(request):
             print("Achei!")
             pacienteaceito = x
     pacienteaceito.medicoResponsavel = None
+    pacienteaceito.status = "Na fila!"
     pacienteaceito.save()
+    return JsonResponse(data)
+
+
+@login_required
+def acompanharchamado(request, id):
+    try:
+        Paciente.objects.get(id=request.user.id)
+    except ObjectDoesNotExist:
+        return HttpResponseRedirect("/")
+    userp = Paciente.objects.get(id=id)
+    template = loader.get_template("acompanhamento.html")
+    context = {"userp": userp}
+    return HttpResponse(template.render(context, request))
+
+
+@csrf_exempt
+def enviartratamento(request):
+    data = {}
+    tratamento = request.GET.get("tratamento")
+    id = request.GET.get("id")
+    paciente = Paciente.objects.get(id=id)
+    paciente.tratamento = str(tratamento)
+    if paciente.historicoTratamentos == None:
+        paciente.historicoTratamentos = {}
+    numTratamento = str(len(paciente.historicoTratamentos)+1)
+    medico = Medico.objects.get(id=request.user.id)
+    date = datetime.now()
+    paciente.historicoTratamentos[f'{numTratamento}-tratamento'] = [tratamento, medico.nome, request.user.username, str(date)]
+    print(len(paciente.historicoTratamentos))
+    paciente.save()
     return JsonResponse(data)

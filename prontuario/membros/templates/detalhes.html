@@ -10,45 +10,35 @@ Detalhes
 {% block content %}
 
 
-<div class="p-3 bg-black text-white text-center">
-    <h1>Detalhes</h1>
-</div>
-<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
-    <div class="container-fluid">
-        <ul class="navbar-nav">
-            <li class="nav-item">
-                <a class="nav-link" href="/">|Inicio|</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/cadastro/">|Cadastrar|</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/login/">|Login|</a>
-            </li>
-            <li>
-                <a class="nav-link" href="/logout/">|Logout|</a>
-            </li>
-            <li>
-                <a class="nav-link" href="/paciente/">|Paciente|</a>
-            </li>
-            <li>
-                <a class="nav-link" href="/medico/">|Medico|</a>
-            </li>
-        </ul>
-    </div>
-</nav>
-
 {% if medico %}
-<div class="container p-2">
+<div class="container pt-5">
     <div class="card">
-        <div class="card-body">
-            <h4 class="card-title">{{x.nome}}</h4>
-            <p class="card-text">
-                Telefone: {{x.tel}}<br>
-                Data de Entrada: {{x.dataDeEntrada}}<br>
-                Data de Nascimento: {{x.nascimento}}<br>
-                Sintomas: {{x.sintomas}}
-            </p>
+        <div class="container d-flex align-items-center">
+            <div class="card-body">
+                <h4 class="card-title p-2">{{x.nome}}</h4>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        Telefone: {{x.tel}}
+                    </li>
+                    <li class="list-group-item">
+                        Data de Entrada: {{x.dataDeEntrada}}
+                    </li>
+                    <li class="list-group-item">
+                        Data de Nascimento: {{x.nascimento}}
+                    </li>
+                    <li class="list-group-item">
+                        Sintomas: {{x.sintomas}}
+                    </li>
+                </ul>
+            </div>
+            {% if x.medicoResponsavel == medico %}
+            <div class="container">
+                <p class="p-sm text-end" id="C1"><button class="btn btn-outline-success" id="tratamento"
+                        onclick="tratamento()">Prescrever medicação ou
+                        tratamento!</button></p>
+                <p class="p-sm text-end"><button class="btn btn-outline-success" id="Fbtn">Finalizar chamado!</button></p>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -58,4 +48,64 @@ Detalhes
 
 {% endif %}
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+
+    function tratamento() {
+        let c1 = window.document.getElementById('C1')
+        if (window.document.getElementById('F1')) {
+            c1.innerHTML = `
+            <p class="p-sm text-end" id="C1"><button class="btn btn-outline-success" id="tratamento"
+                onclick="tratamento()">Prescrever medicação ou
+                tratamento!</button></p>
+            `
+        }
+        else {
+            c1.innerHTML += `
+            <div class="input-group mb-3 pt-4 pb-2">
+                <input type="text" class="form-control" placeholder="Escreva o tratamento!" id="F1">
+                <button class="btn btn-outline-success" type="submit" id="C2">Preescrever!</button>
+            </div>
+            `
+            let bt = window.document.getElementById('tratamento');
+            bt.innerHTML = "Fechar prescrição de tratamento!"
+        }
+    };
+
+    $(document).ready(function () {
+        $(document).on('click', '#C2', function () {
+            let tratamento = document.getElementById('F1').value
+            $.ajax({
+                url: '/enviartratamento/',
+                type: 'get',
+                data: {
+                    'tratamento': tratamento,
+                    'id': '{{x.id}}'
+                },
+                success: function () {
+                    let input = document.getElementById('F1')
+                    input.value = ""
+                }
+            });
+        });
+    });
+
+    $(document).ready(function(){
+        $(document).on('click', '#Fbtn', function(){
+            $.ajax({
+                url: '/finalizartratamento/',
+                type: 'get',
+                data: {
+                    'id': '{{x.id}}'
+                },
+                success: function(){
+                    <!-- criar um texto pedindo para digitar algum texto acima, como digite o nome do paciente para finalizar o tratamento! -->
+                }
+            });
+        });
+    });
+
+
+
+</script>
 {% endblock %}

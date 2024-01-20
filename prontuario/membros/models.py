@@ -21,11 +21,19 @@ class Medico(Usuario):
 
 
 class Paciente(Usuario):
+    STATUS = [
+        ("Na fila!", "Na fila!"),
+        ("Em andamento!", "Em andamento!"),
+        ("Finalizado!", "Finalizado"),
+    ]
+
     sintomas = models.CharField(max_length=255, null=True)
     dataDeEntrada = models.DateField(null=True)
     medicoResponsavel = models.ForeignKey(Medico, on_delete=models.SET_NULL, null=True)
     doente = models.BooleanField(default=False, null=True)
-
+    tratamento = models.CharField(max_length=255, null=True, default="Aguardando tratamento!")
+    status = models.CharField(max_length=255, choices=STATUS, null=True, default="Na fila!")
+    historicoTratamentos = models.JSONField(null=True, default=dict)
 
 class UsuarioBackend(ModelBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
